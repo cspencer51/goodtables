@@ -294,8 +294,9 @@ class SchemaProcessor(base.Processor):
                             else:
                                 self._uniques[column_name].add(column_value)
 
-                        if constraints.get('pattern') is True:
-                            pattern = re.compile(r'{0}'.format(self.pattern))
+                        regex = constraints.get('pattern')
+                        if regex is not None:
+                            pattern = re.compile(r'{0}'.format(regex))
 
                             if not re.match(pattern, column_value):
                                 valid = False
