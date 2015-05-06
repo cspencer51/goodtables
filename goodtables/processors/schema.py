@@ -51,6 +51,13 @@ RESULTS = {
         'msg': 'Column {0} is a unique field, yet the value {1} already exists.',
         'help': '',
         'help_edit': ''
+    },
+    'schema_007': {
+        'id': 'schema_007',
+        'name': 'Incorrect Pattern',
+        'msg': 'Column {0} value {1} does not match the specified pattern.',
+        'help': '',
+        'help_edit': ''
     }
 }
 
@@ -286,6 +293,30 @@ class SchemaProcessor(base.Processor):
 
                             else:
                                 self._uniques[column_name].add(column_value)
+
+                        if constraints.get('pattern') is True:
+                            pattern = re.compile(r'{0}'.format(self.pattern))
+
+                            if not re.match(pattern, column_value):
+                                valid = False
+                                _type = RESULTS['schema_007']
+                                entry = self.make_entry(
+                                    self.name,
+                                    self.RESULT_CATEGORY_ROW,
+                                    self.RESULT_LEVEL_ERROR,
+                                    _type['msg'].format(column_name, index),
+                                    _type['id'],
+                                    _type['name'],
+                                    row,
+                                    index,
+                                    row_name,
+                                    headers.index(column_name),
+                                    column_name
+                                )
+
+                                self.report.write(entry)
+                                if self.fail_fast:
+                                    return valid, headers, index, row
 
                         # TODO: check constraints.min* and constraints.max*
 
